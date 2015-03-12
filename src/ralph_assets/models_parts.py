@@ -5,6 +5,7 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
+from django.core.urlresolvers import reverse
 from django.db import models
 from lck.django.choices import Choices
 from lck.django.common.models import TimeTrackable
@@ -14,7 +15,13 @@ from ralph.discovery.models_device import (
     ServiceCatalog,
 )
 from ralph_assets.history.models import HistoryMixin
-from ralph_assets.models_assets import Asset, AssetType, Warehouse
+from ralph_assets.models_assets import (
+    Asset,
+    ASSET_TYPE2MODE,
+    AssetType,
+    Warehouse,
+)
+from ralph.ui.channels import RestrictedLookupChannel
 
 
 class PartModelType(Choices):
@@ -80,3 +87,23 @@ class Part(HistoryMixin, TimeTrackable):
 
     def __unicode__(self):
         return '{} ({})'.format(self.sn, self.model)
+
+    @property
+    def url(self):
+        return reverse(
+            'part_edit',
+            kwargs={
+                'mode': ASSET_TYPE2MODE[self.asset_type],
+                'part_id': self.id,
+            },
+        )
+
+
+class PartModelLookup(RestrictedLookupChannel):
+
+    model = PartModel
+
+    def get_query(self, q, request):
+        return self.model.objects.filter(
+            name__icontains=q
+        ).order_by('name')[:10]

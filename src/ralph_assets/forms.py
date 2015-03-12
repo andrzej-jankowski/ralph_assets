@@ -663,39 +663,6 @@ class DeviceForm(ModelForm):
         return self.cleaned_data
 
 
-class BasePartForm(ModelForm):
-    class Meta:
-        model = PartInfo
-        fields = ('barcode_salvaged',)
-
-    def __init__(self, *args, **kwargs):
-        """mode argument is required for distinguish ajax sources"""
-        mode = kwargs.get('mode')
-        if mode:
-            del kwargs['mode']
-        else:
-            raise ModeNotSetException("mode argument not given.")
-        super(BasePartForm, self).__init__(*args, **kwargs)
-
-        channel = 'asset_dcdevice' if mode == 'dc' else 'asset_bodevice'
-        self.fields['device'] = AutoCompleteSelectField(
-            LOOKUPS[channel],
-            required=False,
-            help_text=_('Enter barcode, sn, or model.'),
-        )
-        self.fields['source_device'] = AutoCompleteSelectField(
-            LOOKUPS[channel],
-            required=False,
-            help_text=_('Enter barcode, sn, or model.'),
-        )
-        if self.instance.source_device:
-            self.fields[
-                'source_device'
-            ].initial = self.instance.source_device.id
-        if self.instance.device:
-            self.fields['device'].initial = self.instance.device.id
-
-
 class DependencyAssetForm(DependencyForm):
     """
     Containts common solution for adding asset and editing asset section.
@@ -1231,25 +1198,6 @@ class MoveAssetPartForm(Form):
     )
 
 
-class AddPartForm(BaseAddAssetForm, MultivalFieldForm):
-    '''
-        Add new part for device
-    '''
-
-    multival_fields = ['sn']
-
-    sn = MultilineField(
-        db_field_path='sn', label=_('SN/SNs'), required=True,
-        widget=Textarea(attrs={'rows': 25}),
-        validators=[validate_snbcs],
-    )
-
-    def __init__(self, *args, **kwargs):
-        super(AddPartForm, self).__init__(*args, **kwargs)
-        self.fieldsets = asset_fieldset()
-        self.fieldsets['Basic Info'].remove('barcode')
-
-
 class AddDeviceForm(BaseAddAssetForm, MultivalFieldForm):
     '''
         Add new device form
@@ -1372,16 +1320,6 @@ class OfficeForm(ModelForm):
         widgets = {
             'date_of_last_inventory': DateWidget(),
         }
-
-
-class EditPartForm(BaseEditAssetForm):
-    def __init__(self, *args, **kwargs):
-        super(EditPartForm, self).__init__(*args, **kwargs)
-        self.fieldsets = asset_fieldset()
-        self.fieldsets['Assigned supports info'] = [
-            'required_support',
-            'supports',
-        ]
 
 
 class EditDeviceForm(BaseEditAssetForm):
