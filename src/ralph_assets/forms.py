@@ -177,6 +177,8 @@ LOOKUPS = {
     'licence': ('ralph_assets.models', 'LicenceLookup'),
     'linked_device': ('ralph_assets.models', 'LinkedDeviceNameLookup'),
     'manufacturer': ('ralph_assets.models', 'ManufacturerLookup'),
+    'part_model': ('ralph_assets.models', 'PartModelLookup'),
+    'part_warehouse': ('ralph_assets.models', 'WarehouseLookup'),
     'ralph_device': ('ralph_assets.models', 'RalphDeviceLookup'),
     'service': ('ralph.ui.channels', 'ServiceCatalogLookup'),
     'softwarecategory': ('ralph_assets.models', 'SoftwareCategoryLookup'),
